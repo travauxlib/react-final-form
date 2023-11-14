@@ -14,6 +14,7 @@ import type {
 } from "./types";
 import isReactNative from "./isReactNative";
 import getValue from "./getValue";
+import useEffectOnceInStrictMode from "./useEffectOnceInStrictMode";
 import useForm from "./useForm";
 import useLatest from "./useLatest";
 import { addLazyFieldMetaState } from "./getters";
@@ -110,7 +111,8 @@ function useField<FormValues: FormValuesShape>(
     return initialState;
   });
 
-  React.useEffect(
+  // React.useEffect(
+  useEffectOnceInStrictMode(
     () =>
       register((state) => {
         if (firstRender.current) {

@@ -8,7 +8,7 @@ const crossEnv = npsUtils.crossEnv;
 module.exports = {
   scripts: {
     test: {
-      default: crossEnv("NODE_ENV=test jest --coverage"),
+      default: crossEnv("NODE_ENV=test jest --coverage --watch"),
       update: crossEnv("NODE_ENV=test jest --coverage --updateSnapshot"),
       watch: crossEnv("NODE_ENV=test jest --watch"),
       codeCov: crossEnv(
