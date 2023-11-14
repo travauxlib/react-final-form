@@ -9,6 +9,7 @@ const useEffectOnceInStrictMode: typeof useEffect = (effect, deps) => {
     if (effectCalled.current.every((el, i) => deps[i] === el)) {
       rendered.current = true;
     } else {
+      rendered.current = false;
       effectCalled.current = null;
     }
   }
