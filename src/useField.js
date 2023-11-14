@@ -16,6 +16,7 @@ import isReactNative from "./isReactNative";
 import getValue from "./getValue";
 import useForm from "./useForm";
 import useLatest from "./useLatest";
+import useEffectOnceInStrictMode from "./useEffectOnceInStrictMode";
 import { addLazyFieldMetaState } from "./getters";
 import useConstantCallback from "./useConstantCallback";
 
@@ -55,13 +56,13 @@ function useField<FormValues: FormValuesShape>(
 
   const configRef = useLatest(config);
 
-  const register = (callback: (FieldState) => void, silent: boolean) =>
+  const register = (callback: (FieldState) => void, silent: boolean) => {
     // avoid using `state` const in any closures created inside `register`
     // because they would refer `state` from current execution context
     // whereas actual `state` would defined in the subsequent `useField` hook
     // execution
     // (that would be caused by `setState` call performed in `register` callback)
-    form.registerField(name, callback, subscription, {
+    const unregister = form.registerField(name, callback, subscription, {
       afterSubmit,
       beforeSubmit: () => {
         const {
@@ -90,6 +91,18 @@ function useField<FormValues: FormValuesShape>(
       validateFields,
     });
 
+    form.renders = form.renders || {};
+    if (!form.renders[name]) {
+      form.renders[name] = true;
+      return () => {};
+    } else {
+      return () => {
+        form.renders[name] = false;
+        unregister();
+      };
+    }
+  }
+
   const firstRender = React.useRef(true);
 
   // synchronously register and unregister to query field state for our subscription on first render
@@ -110,7 +123,7 @@ function useField<FormValues: FormValuesShape>(
     return initialState;
   });
 
-  React.useEffect(
+  useEffectOnceInStrictMode(
     () =>
       register((state) => {
         if (firstRender.current) {
